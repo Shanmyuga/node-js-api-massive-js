@@ -16,5 +16,6 @@
 	"api.client.get.empty": "No clients",
 	"api.user.update.success": "User update success",
 	"api.user.delete.succes": "Delete user success",
-	"api.user.save.success": "User saved success"
+	"api.user.save.success": "User saved success",
+	"api.epic.get.error": "api.epic.get.error"
 }

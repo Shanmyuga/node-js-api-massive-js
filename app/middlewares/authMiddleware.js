@@ -17,7 +17,7 @@ let init = (app) => {
             try {
                 const user = await authService.findById(jwtPayload.id);
                 if (user) {
-                    return done(null, user);
+                    return done(null, user.rows[0][0]);
                 }
                 return done(null, false);
             } catch (error) {

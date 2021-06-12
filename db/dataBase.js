@@ -1,28 +1,28 @@
-const massive = require('massive');
+const oracledb = require('oracledb');
+oracledb.outFormat = oracledb.ARRAY;
 const CONSTANTS = require('../app/utils/constants');
 
 class Database {
     constructor() {
         if (Database.instance) return Database.instance;
 
-        this.pg = "";
+        this.connection = null;
         Database.instance = this;
     }
 
     async init() {
-        this.pg = await massive({
-            host: CONSTANTS.postgreHost,
-            port: CONSTANTS.postgresPort,
-            database: CONSTANTS.postgreDb,
-            user: CONSTANTS.postgreUser,
-            password: CONSTANTS.postgrePass
+        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_10'});
+        this.connection = await oracledb.getConnection({
+            user: "scigenics",
+            password: "scigenics",
+            connectString: "(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 136.185.10.147)(PORT = 32771)) (CONNECT_DATA = (SERVER = DEDICATED)  (SERVICE_NAME=xe.oraslim.com)))"
         });
 
-        return this.massive;
+        return this.oracledb;
     }
 
     destroy() {
-        if (this.pg) this.pg.pgp.end();
+        if (this.connection) this.connection.pgp.end();
     }
 }
 
