@@ -12,7 +12,7 @@ const app = express();
 app.listen(3000);
 init(app);
 
-database.init();
+database.initialize();
 
 //Set locale
 i18n.configure({

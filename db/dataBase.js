@@ -1,30 +1,56 @@
 const oracledb = require('oracledb');
+const dbConfig = require('../db/config/dbconfig');
 oracledb.outFormat = oracledb.ARRAY;
 const CONSTANTS = require('../app/utils/constants');
 
-class Database {
-    constructor() {
-        if (Database.instance) return Database.instance;
 
-        this.connection = null;
-        Database.instance = this;
-    }
 
-    async init() {
+
         oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_10'});
-        this.connection = await oracledb.getConnection({
-            user: "scigenics",
-            password: "scigenics",
-            connectString: "(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 136.185.10.147)(PORT = 32771)) (CONNECT_DATA = (SERVER = DEDICATED)  (SERVICE_NAME=xe.oraslim.com)))"
-        });
 
-        return this.oracledb;
-    }
 
-    destroy() {
-        if (this.connection) this.connection.pgp.end();
+
+
+
+async function initialize() {
+    console.log("initialize");
+    await   oracledb.createPool(dbConfig.scigenicsdb);
+}
+
+module.exports.initialize = initialize;
+
+async function close() {
+    await oracledb.getPool().close(0);
+}
+
+module.exports.close = close;
+
+async function simpleExecute(statement, binds = [], opts = {}) {
+    let conn;
+    let result = [];
+
+
+
+    try {
+        conn = await oracledb.getConnection('test',);
+        result = await conn.execute(statement, binds, opts);
+        return (result);
+    } catch (err) {
+        console.error(err);
+        throw (err);
+    } finally {
+        if (conn) { // conn assignment worked, need to close
+            try {
+                await conn.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 }
 
-const instance = new Database();
-module.exports = instance;
+module.exports.simpleExecute = simpleExecute;
+
+
+
+

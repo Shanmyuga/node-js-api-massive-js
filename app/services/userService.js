@@ -22,7 +22,11 @@ class userService {
         const result = await db.pg.user_app.findOne({id: id});
         return result;
     }
-
+    static async checkPMRole(req) {
+        let id = req.params.id;
+        let result = await db.simpleExecute("select role_name from SCIGENICS_ROLE_MASTER where role_name = 'pmtrack' and seq_role_id in (select seq_role_id from SCI_USER_ROLE_DET ud,scigenics_user_master um  where ud.seq_user_id = um.seq_user_id and user_id = :userId)",[req.user]);
+        return result;
+    }
     static async getAll(req, page, pageSize) {
         const active = req.query.active || 'id';
         const order = req.query.order || 'desc';
