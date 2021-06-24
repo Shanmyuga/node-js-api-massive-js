@@ -11,13 +11,13 @@ class Database {
     }
 
     async init() {
-        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_10'});
+        oracledb.initOracleClient({libDir: '/Users/prakash/Downloads/instantclient_19_8'});
         this.connection = await oracledb.getConnection({
             user: "scigenics",
             password: "scigenics",
-            connectString: "(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 136.185.10.147)(PORT = 32771)) (CONNECT_DATA = (SERVER = DEDICATED)  (SERVICE_NAME=xe.oraslim.com)))"
+            connectString: "(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.115)(PORT = 32771)) (CONNECT_DATA = (SERVER = DEDICATED)  (SERVICE_NAME=xe.oraslim.com)))"
         });
-
+    console.log(this.connection);
         return this.oracledb;
     }
 
