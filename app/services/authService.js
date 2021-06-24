@@ -10,7 +10,7 @@ function createJwtToken(userId, username) {
 class authService {
     static async findById(id) {
         console.log(id);
-        const result = await db.connection.execute(`SELECT user_id
+        const result = await db.simpleExecute(`SELECT user_id
        FROM SCIGENICS_USER_MASTER 
        WHERE seq_user_id = :id`,
             [id]);
@@ -22,7 +22,7 @@ class authService {
         const plainPassword = req.body.txtPassword;
         let result = null;
 try {
-     result = await db.connection.execute(
+     result = await db.simpleExecute(
         `SELECT password,seq_user_id,user_id
        FROM SCIGENICS_USER_MASTER 
        WHERE user_id = :id`,

@@ -54,6 +54,16 @@ router.get(
         else { res.send({success: true, data: result}); }
     })
 );
+router.get(
+    '/role/pmrolecheck',
+    authJwt(),
+    asyncHandler(async (req, res) => {
+        const result = await userService.checkPMRole(req);
+
+        if (result.length === 0) { res.send({success:false, message:res.__('api.user.get.error')}); }
+        else { res.send({success: true}); }
+    })
+);
 
 router.get(
     '*',

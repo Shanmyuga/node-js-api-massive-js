@@ -8,7 +8,7 @@ router.get(
     '/find/:id',
     authJwt(),
     asyncHandler(async (req, res) => {
-        const result = await epicService.getOne(req);
+        const result = await backLogService.getOne(req);
 
         if (result.length === 0) { res.send({success:false, message:res.__('api.client.get.error')}); }
         else { res.send({success: true, data: result}); }
@@ -45,10 +45,10 @@ router.get(
 );
 
 router.get(
-    '/dept/epic',
+    '/dept/sprint',
     authJwt(),
     asyncHandler(async (req, res) => {
-        const result = await epicService.getDeptWorkorder(req.query.dept);
+        const result = await backLogService.getDeptSprints(req.query.dept);
 
         if (result.length === 0) { res.send({success:false, message:res.__('api.epic.get.error')}); }
         else { res.send({success: true, data: result}); }
@@ -99,11 +99,45 @@ router.post(
     })
 );
 
+
+router.post(
+    '/saveSprint',
+    authJwt(),
+    asyncHandler(async (req, res) => {
+        req.checkBody('seq_sprint_id').trim().notEmpty();
+        req.checkBody('seq_backlog_id').trim().notEmpty();
+
+        let errors = req.validationErrors();
+
+        if (errors) {
+            res.send({
+                success: false,
+                message: res.__('api.baclog.fields.empty')
+            });
+        } else {
+            const id = req.body.id;
+            console.log("body " + id);
+            const result = await backLogService.saveSprint(req, id);
+
+            if (result) {
+                res.send({
+                    success: true,
+                    message: res.__((id ? 'api.client.update.success' : 'api.client.save.success'))
+                });
+            } else {
+                res.send({
+                    success: false,
+                    message: res.__((id ? 'api.client.update.error' : 'api.client.save.error'))
+                });
+            }
+        }
+    })
+);
 router.delete(
     '/delete/:id',
     authJwt(),
     asyncHandler(async (req, res, next) => {
-        const result = await epicService.delete(req);
+        const result = await backLogService.delete(req);
 
         if (result!==null) {
             res.send({success: true, message: res.__('api.client.delete.succes')});
