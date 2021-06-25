@@ -132,6 +132,24 @@ class epicService {
         return true;
     }
 
+    static async saveAll(req, id) {
+
+        console.log(req.user);
+        let dept_id = req.body.dept_id;
+        let workOrderDesc = req.body.workOrder_desc;
+        let user_story_id = req.body.custom_user_story_id;
+        let user_story_desc = req.body.custom_user_story_desc;
+        let standardEpicId = req.body.standard_epic_id;
+
+
+        
+        db.simpleExecute("    INSERT INTO \"SCIGENICS\".\"SCI_BACKLOG_MASTER\" (          seq_backlog_id,          dept_id,          user_story_task,          epic_desc,          user_story_id,          created_date,          created_by,          epic_status,          updated_by,          updated_date,          workorder_ref     ,seq_work_id ) VALUES (          sci_backlog_master_seq.NEXTVAL,          :dept_id,        :user_story_task_desc,        (select distinct epic_desc from SCI_STANDARD_EPIC_DATA where epic_id = :epic_id),          :user_story_id,          sysdate,         :logged_in_user,         'BKLOG',           :logged_in_user,        sysdate,          :work_order_ref,          (select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref)      )",
+            [dept_id,user_story_desc,standardEpicId,user_story_id,req.user,req.user,workOrderDesc,workOrderDesc] ,{ autoCommit: true });
+
+
+
+        return true;
+    }
 }
 
 module.exports = epicService;

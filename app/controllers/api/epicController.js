@@ -140,6 +140,39 @@ router.post(
         }
     })
 );
+router.post(
+    '/saveAll',
+    authJwt(),
+    asyncHandler(async (req, res) => {
+
+        req.checkBody('workOrder_desc').trim().notEmpty();
+
+        let errors = req.validationErrors();
+
+        if (errors) {
+            res.send({
+                success: false,
+                message: res.__('api.client.fields.empty')
+            });
+        } else {
+            const id = req.body.id;
+            console.log("body " + id);
+            const result = await epicService.saveAll(req, id);
+
+            if (result) {
+                res.send({
+                    success: true,
+                    message: res.__((id ? 'api.client.update.success' : 'api.client.save.success'))
+                });
+            } else {
+                res.send({
+                    success: false,
+                    message: res.__((id ? 'api.client.update.error' : 'api.client.save.error'))
+                });
+            }
+        }
+    })
+);
 
 router.delete(
     '/delete/:id',
