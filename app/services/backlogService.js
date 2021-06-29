@@ -115,12 +115,13 @@ class BacklogService {
 
 
            let result =  db.simpleExecute("select seq_sprint_id from SCI_SPRINT_JOB_DETAILS where SEQ_SPRINT_ID=:seq_sprint_id and seq_backlog_id = :seq_backlog_id",[seq_sprint_id,seq_backlog_id]);
-           if(result.length ===0) {
-               db.simpleExecute("insert into  SCI_SPRINT_JOB_DETAILS( SEQ_SPRINT_JOB_ID, SEQ_SPRINT_ID, SEQ_BACKLOG_ID, INSERTED_DATE, INSERTED_BY, USER_TASK_STATUS, ASSIGNED_TO, UPDATED_BY,updated_date,SPRINT_NAME) values (SCI_SPRINT_JOB_DETAILS_SEQ.nextval,:SEQ_SPRINT_NO,:SEQ_BACKLOG_ID,sysdate,:INSERTED_BY,'IN_SPRINT',null,:UPDATED_BY,sysdate,(select sprint_name from sci_sprint_master where seq_Sprint_id = :seq_Sprint))",[seq_sprint_id,seq_backlog_id,req.user,req.user,seq_sprint_id],{autoCommit:true});
+           if(result.length) {
+               db.simpleExecute("update SCI_SPRINT_JOB_DETAILS set user_task_status = 'IN_SPRINT' where SEQ_SPRINT_ID = :seq_sprint_id and seq_backlog_id = :seq_backlog_id  ",[seq_sprint_id,seq_backlog_id],{autocommit:true});
 
            }
            else {
-               db.simpleExecute("update SCI_SPRINT_JOB_DETAILS set user_task_status = 'IN_SPRINT' where SEQ_SPRINT_ID = :seq_sprint_id and seq_backlog_id = :seq_backlog_id  ",[seq_sprint_id,seq_backlog_id],{autocommit:true});
+               db.simpleExecute("insert into  SCI_SPRINT_JOB_DETAILS( SEQ_SPRINT_JOB_ID, SEQ_SPRINT_ID, SEQ_BACKLOG_ID, INSERTED_DATE, INSERTED_BY, USER_TASK_STATUS, ASSIGNED_TO, UPDATED_BY,updated_date,SPRINT_NAME) values (SCI_SPRINT_JOB_DETAILS_SEQ.nextval,:SEQ_SPRINT_NO,:SEQ_BACKLOG_ID,sysdate,:INSERTED_BY,'IN_SPRINT',null,:UPDATED_BY,sysdate,(select sprint_name from sci_sprint_master where seq_Sprint_id = :seq_Sprint))",[seq_sprint_id,seq_backlog_id,req.user,req.user,seq_sprint_id],{autoCommit:true});
+
            }
             db.simpleExecute("update SCI_BACKLOG_MASTER set EPIC_STATUS = 'IN_SPRINT' ,updated_by = :updated_by,updated_date = sysdate where seq_backlog_id = :seq_backlog_id ",
                 [req.user,seq_backlog_id] ,{ autoCommit: true });

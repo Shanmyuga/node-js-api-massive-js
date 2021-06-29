@@ -7,7 +7,7 @@ const CONSTANTS = require('../app/utils/constants');
 
     
 
-        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_10'});
+        oracledb.initOracleClient({libDir: '/Users/prakash/Downloads/instantclient_19_8'});
 
 
 
