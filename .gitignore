@@ -1,5 +1,6 @@
 # dependencies
 node_modules/*
-
+instantclient_21_1/*
+README.md
 # Idea Project
 .idea/*

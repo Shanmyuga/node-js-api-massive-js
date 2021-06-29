@@ -63,17 +63,20 @@ class BacklogService {
         let searchByDept = req.body.searchByDept || req.query.searchByDept;
         let searchByDesc = req.body.searchByDesc || req.query.searchByDesc;
         let searchByWork = req.body.searchByWork || req.query.searchByWork;
+        let searchByWorkDesc = req.body.searchByWorkDesc || req.query.searchByWorkDesc;
         const newPage = (page -1) * pageSize;
         let searchByDeptParam = '%'+searchByDept+'%';
         if (searchByDeptParam === undefined) {searchByDeptParam = '%%';}
 
         let searchByDescParam = '%'+searchByDesc+'%';
         if (searchByDescParam === undefined) {searchByDescParam = '%%';}
+        let searchByWorkDescParam = '%'+searchByWorkDesc+'%';
+        if (searchByWorkDescParam === undefined) {searchByWorkDescParam = '%%';}
         let searchByWorkParam = '%'+searchByWork+'%';
         if (searchByWorkParam === undefined) {searchByWorkParam = '%%';}
         let resultArray = new Array();
 
-        const result = await db.simpleExecute("select ab.dept_id ,ab.epic_desc, ab.user_story_id,ab.user_story_task ,ab.epic_status ,ab.workorder_ref,ab.seq_work_id,ab.seq_backlog_id from  (select rownum as rn ,dept_id,epic_desc, user_story_id,user_story_task,epic_status ,workorder_ref,seq_work_id,seq_backlog_id from SCI_BACKLOG_MASTER  where epic_status ='BKLOG' and  dept_id like :search1 and user_story_task like :search2 and seq_work_id like :search3 ) ab where ab.rn between :startlimit and :endlimit ",[searchByDeptParam,searchByDescParam,searchByWorkParam,newPage,parseInt(newPage) +parseInt(pageSize)]
+        const result = await db.simpleExecute("select ab.dept_id ,ab.epic_desc, ab.user_story_id,ab.user_story_task ,ab.epic_status ,ab.workorder_ref,ab.seq_work_id,ab.seq_backlog_id from  (select rownum as rn ,dept_id,epic_desc, user_story_id,user_story_task,epic_status ,workorder_ref,seq_work_id,seq_backlog_id from SCI_BACKLOG_MASTER  where epic_status ='BKLOG' and  dept_id like :search1 and user_story_task like :search2 and seq_work_id like :search3  and workorder_ref like :search4) ab where ab.rn between :startlimit and :endlimit ",[searchByDeptParam,searchByDescParam,searchByWorkParam,searchByWorkDescParam,newPage,parseInt(newPage) +parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
             resultArray.push(new BackLogValueObject(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7]));

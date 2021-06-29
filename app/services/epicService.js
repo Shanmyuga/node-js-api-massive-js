@@ -132,6 +132,22 @@ class epicService {
         return true;
     }
 
+    static async saveAll(req, id) {
+
+        console.log(req.user);
+
+        let workOrderDesc = req.body.workOrder_desc;
+
+
+
+        
+        db.simpleExecute(" insert into SCI_BACKLOG_MASTER (SEQ_BACKLOG_ID, DEPT_ID, USER_STORY_TASK, EPIC_DESC, USER_STORY_ID, CREATED_DATE, CREATED_BY, EPIC_STATUS, UPDATED_BY, UPDATED_DATE, WORKORDER_REF, SEQ_WORK_ID)      (select SCI_BACKLOG_MASTER_SEQ.nextval ,    DEPT_ID,  nvl(USER_STORY_TASK,'NA'),  EPIC_DESC,  USER_STORY_ID,      sysdate,  :CREATED_BY,  'BKLOG',  :updated_by,  sysdate,:job_Dec,  (select seq_work_id from SCI_WORKORDER_MASTER where job_Desc = :jobdesc)    from SCI_STANDARD_EPIC_DATA st where USER_STORY_ID not in (select USER_STORY_ID from SCI_BACKLOG_MASTER bm where bm.workorder_ref = :workorder_ref)) ",
+            [req.user,req.user,workOrderDesc,workOrderDesc,workOrderDesc] ,{ autoCommit: true });
+
+
+
+        return true;
+    }
 }
 
 module.exports = epicService;
