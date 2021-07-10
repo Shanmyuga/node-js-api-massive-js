@@ -1,9 +1,9 @@
 let db = require('../../db/dataBase');
 const oracledb = require("oracledb");
 let DropDown = require('../vo/dropdown');
-let sprintValueObject = require('../vo/sprintVO');
+let bulletinVo = require('../vo/bulletinVO');
 
-class sprintService {
+class bulletinService {
 
     static async delete(req) {
         let id = req.params.id;
@@ -16,11 +16,7 @@ class sprintService {
     static async getOne(req) {
         let id = req.params.id;
         let resultArray = new Array();
-        const result = await db.simpleExecute("SELECT      bm.dept_id,      bm.epic_desc,      bm.user_story_id,      bm.user_story_task,      bm.epic_status,      bm.workorder_ref,      bm.seq_work_id,      bm.seq_backlog_id,      sj.seq_sprint_job_id  FROM      sci_backlog_master bm,      sci_sprint_job_details sj  WHERE  sj.seq_backlog_id = bm.seq_backlog_id      and sj.seq_sprint_job_id = :seq_sprint_job_id", [id]);
 
-        result.rows.forEach((row) => {
-            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],row[8]));
-        });
         return resultArray;
     }
 
@@ -36,68 +32,26 @@ class sprintService {
         return droparray;
     }
 
-    static async getSprintDataByName(sprintName) {
 
-        const result = await db.simpleExecute("select  bm.dept_id ,bm.epic_desc ,bm.user_story_id ,bm.user_story_task,bm.epic_status ,bm.workorder_ref,bm.seq_work_id ,sj.seq_backlog_id ,sj.seq_sprint_job_id  from Sci_sprint_job_details sj  ,SCI_BACKLOG_MASTER bm where sj.seq_backlog_id = bm.seq_backlog_id and sprint_name = :sprint_name  ", [sprintName]
-        );
 
-        let resultArray = new Array();
-        result.rows.forEach((row) => {
-            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]));
-        });
-        return resultArray;
-    }
 
-    static async getDept(req) {
 
-        const result = await db.simpleExecute("select distinct dept_id from SCI_STANDARD_EPIC_DATA where dept_id is not null"
-        );
-        let droparray = new Array();
-
-        result.rows.forEach((row) => {
-            droparray.push(new DropDown(row[0], row[0]));
-        });
-        return droparray;
-    }
-
-    static async getUsers(req) {
-
-        const result = await db.simpleExecute("select  user_id||'-'||user_firstname from scigenics_user_master where user_id is not null"
-        );
-        let droparray = new Array();
-
-        result.rows.forEach((row) => {
-            droparray.push(new DropDown(row[0], row[0]));
-        });
-        return droparray;
-    }
-    static async getWorkOrders(req) {
-
-        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGEN.sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y'"
-        );
-        let droparray = new Array();
-        const gbp = new DropDown({label: 'GBP', value: 'British Pounds'});
-        result.rows.forEach((row) => {
-            droparray.push(new DropDown(row[0], row[1]));
-        });
-        return droparray;
-    }
 
     static async getAll(req, page, pageSize) {
         let active = req.query.active || 'id';
         const order = req.query.order || 'desc';
-        let searchByName = req.body.searchByName || req.query.searchByName;
+        let searchByDept = req.body.searchByDept || req.query.searchByDept;
 
         const newPage = (page - 1) * pageSize;
-        let searchByNameParam = '%' + searchByName + '%';
-        if (searchByNameParam === undefined) {
-            searchByNameParam = '%%';
+        let searchByDeptParam = '%' + searchByDept + '%';
+        if (searchByDeptParam === undefined) {
+            searchByDeptParam = '%%';
         }
 
 
         let resultArray = new Array();
 
-        const result = await db.simpleExecute("SELECT     ab.dept_id,     ab.epic_desc,     ab.user_story_id,     ab.user_story_task,     ab.epic_status,     ab.workorder_ref,     ab.seq_work_id,     ab.seq_backlog_id,     ab.seq_sprint_job_id,     ab.assigned_to,     ab.comments FROM     (         SELECT             ROWNUM  AS rn,             sj.seq_sprint_job_id,             bm.dept_id,             bm.epic_desc,             bm.user_story_id,             bm.user_story_task,             bm.epic_status,             bm.workorder_ref,             bm.seq_work_id,             sj.seq_backlog_id,             (                 SELECT                     assigned_to                 FROM                     sci_sprint_story_comments cm                 WHERE                     cm.seq_story_rm_id = (                         SELECT                             MAX(seq_story_rm_id)                         FROM                             sci_sprint_story_comments ct                         WHERE                             ct.seq_sprint_job_id = sj.seq_sprint_job_id                     )             )       AS assigned_to,             (                 SELECT                     user_comments                 FROM                     sci_sprint_story_comments cm                 WHERE                     cm.seq_story_rm_id = (                         SELECT                             MAX(seq_story_rm_id)                         FROM                             sci_sprint_story_comments ct                         WHERE                             ct.seq_sprint_job_id = sj.seq_sprint_job_id                     )             )       AS comments         FROM             sci_sprint_job_details  sj,             sci_backlog_master      bm         WHERE                 sj.seq_backlog_id = bm.seq_backlog_id             AND sj.sprint_name LIKE :sprint_name     ) ab WHERE     ab.rn BETWEEN :startlimit AND :endlimit", [searchByNameParam, newPage, parseInt(newPage) + parseInt(pageSize)]
+        const result = await db.simpleExecute("SELECT        ab.created_by,        ab.message,        ab.assigned_to,        ab.ack_by,        ab.job_desc,        ab.targetdate,       ab.seq_dept_message_id    FROM        (            SELECT                ROWNUM  AS rn,              created_by,        message,        assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_message_id            FROM                sci_dept_messages  sj                where assigned_to like :dept_id                                   ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam, newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
             resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],row[9],row[10]));
@@ -144,14 +98,14 @@ class sprintService {
     static async save(req, id) {
 
         console.log(req.user);
-        let dept_id = req.body.dept_id;
-        let seqBacklogId = req.body.seq_backlog_id;
+        let message = req.body.message;
+        let deptAssignedTo = req.body.dept_assigned_to;
 
-        let seqSprintJobId = req.body.seq_sprint_job_id;
-        let comments = req.body.comments;
-        let assigned_to = req.body.assigned_to;
-        db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , :SEQ_SPRINT_JOB_ID,:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
-            [seqSprintJobId, comments, seqBacklogId, req.user,assigned_to], {autoCommit: true});
+        let targetDate = req.body.target_date;
+        let jobDesc = req.body.job_desc
+
+        db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'dd-MM-YYYY'),null,null )  ",
+            [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,targetDate], {autoCommit: true});
 
         return true;
     }

@@ -1,56 +1,51 @@
 class BulletinVO {
 
 
-    constructor(dept_id, epic_desc,user_story_id,user_story_task,epic_status,job_desc,seq_work_id,seq_backlog_id,seq_sprint_job_id,assigned_to,comments) {
-        this._dept_id = dept_id;
+    constructor(message_created_by, message,dept_assigned_to,ack_by,job_desc,target_date,seq_dept_message_id) {
 
-        this._epic_desc = epic_desc;
-        this._user_story_id = user_story_id;
-        this._user_story_task = user_story_task;
-        this._epic_status = epic_status;
+
+        this._dept_assigned_to = dept_assigned_to;
+        this._ack_by = ack_by;
         this._job_desc = job_desc;
-        this._seq_work_id = seq_work_id;
-        this._seq_backlog_id = seq_backlog_id;
-        this._seq_sprint_job_id = seq_sprint_job_id;
-        this._assigned_to = assigned_to;
-        this._comments = comments;
+        this._target_date = target_date;
+        this._message_created_by = message_created_by;
+        this._message = message;
+        this._seq_dept_message_id = seq_dept_message_id;
+
     }
 
 
-    get dept_id() {
-        return this._dept_id;
+    get message_created_by() {
+        return this._message_created_by;
     }
 
-    set dept_id(value) {
-        this._dept_id = value;
+    set message_created_by(value) {
+        this._message_created_by = value;
     }
 
-
-
-    get epic_desc() {
-        return this._epic_desc;
+    get message() {
+        return this._message;
     }
 
-    set epic_desc(value) {
-        this._epic_desc = value;
+    set message(value) {
+        this._message = value;
     }
 
-    get user_story_id() {
-        return this._user_story_id;
+    get dept_assigned_to() {
+        return this._dept_assigned_to;
     }
 
-    set user_story_id(value) {
-        this._user_story_id = value;
+    set dept_assigned_to(value) {
+        this._dept_assigned_to = value;
     }
 
-    get user_story_task() {
-        return this._user_story_task;
+    get ack_by() {
+        return this._ack_by;
     }
 
-    set user_story_task(value) {
-        this._user_story_task = value;
+    set ack_by(value) {
+        this._ack_by = value;
     }
-
 
     get job_desc() {
         return this._job_desc;
@@ -60,37 +55,20 @@ class BulletinVO {
         this._job_desc = value;
     }
 
-    get seq_work_id() {
-        return this._seq_work_id;
+    get target_date() {
+        return this._target_date;
     }
 
-    set seq_work_id(value) {
-        this._seq_work_id = value;
-    }
-
-    get seq_backlog_id() {
-        return this._seq_backlog_id;
-    }
-
-    set seq_backlog_id(value) {
-        this._seq_backlog_id = value;
+    set target_date(value) {
+        this._target_date = value;
     }
 
 
-    get epic_status() {
-        return this._epic_status;
+    get seq_dept_message_id() {
+        return this._seq_dept_message_id;
     }
 
-    set epic_status(value) {
-        this._epic_status = value;
-    }
-
-
-    get seq_sprint_job_id() {
-        return this._seq_sprint_job_id;
-    }
-
-    set seq_sprint_job_id(value) {
-        this._seq_sprint_job_id = value;
+    set seq_dept_message_id(value) {
+        this._seq_dept_message_id = value;
     }
 }

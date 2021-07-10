@@ -4,6 +4,7 @@ const userController = require('./controllers/api/userController');
 const epicController = require('./controllers/api/epicController');
 const backlogController = require('./controllers/api/backlogController');
 const sprintController  = require('./controllers/api/sprintController');
+const bulletinController  = require('./controllers/api/bulletinController');
 module.exports = function (app) {
     app.use('/api/auth',               authController);
     app.use('/api/user',               userController);
@@ -11,4 +12,5 @@ module.exports = function (app) {
     app.use('/api/epic',             epicController);
     app.use('/api/backlog',             backlogController);
     app.use('/api/sprint',             sprintController);
+    app.use('/api/bulletin',             bulletinController);
 }
