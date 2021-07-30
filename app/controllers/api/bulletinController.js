@@ -44,8 +44,7 @@ router.post(
     '/save',
     authJwt(),
     asyncHandler(async (req, res) => {
-        req.checkBody('seq_sprint_job_id').trim().notEmpty();
-        req.checkBody('seq_backlog_id').trim().notEmpty();
+
 
         let errors = req.validationErrors();
 

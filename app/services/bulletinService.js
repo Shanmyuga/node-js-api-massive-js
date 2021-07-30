@@ -103,9 +103,11 @@ class bulletinService {
 
         let targetDate = req.body.target_date;
         let jobDesc = req.body.job_desc
-
-        db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'dd-MM-YYYY'),null,null )  ",
-            [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,targetDate], {autoCommit: true});
+        console.log(targetDate);
+        let datefomart = this.formatDate(targetDate);
+        console.log(datefomart);
+        db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null )  ",
+            [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart], {autoCommit: true});
 
         return true;
     }
@@ -123,6 +125,20 @@ class bulletinService {
 
 
         return true;
+    }
+
+     static formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
     }
 }
 
