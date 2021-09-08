@@ -1,8 +1,8 @@
 let db = require('../../db/dataBase');
 const oracledb = require("oracledb");
 let DropDown = require('../vo/dropdown');
-let bulletinVo = require('../vo/bulletinVO');
-
+let BulletinVO = require('../vo/bulletinVO');
+let BulletinVOResponse = require('../vo/bulletinResponse');
 class bulletinService {
 
     static async delete(req) {
@@ -13,13 +13,38 @@ class bulletinService {
         return result;
     }
 
+    static async getFileName(req) {
+        let id = req.params.id;
+        let result = await db.simpleExecute("select ATTACH_FILENAME,CONTENT_TYPE from sci_dept_messages where SEQ_DEPT_MESS_ID =:dept_key",[id]);
+        let droparray = new Array();
+        result.rows.forEach((row) => {
+            droparray.push(new DropDown(row[0],row[1]));
+        });
+
+
+        return droparray;
+    }
     static async getOne(req) {
         let id = req.params.id;
-        let resultArray = new Array();
+        let result = await db.simpleExecute("select attach from sci_dept_messages");
+        let total = result.rows[0][0];
+        return total;
 
-        return resultArray;
+
     }
 
+
+    static async getBulletinMessage(req) {
+        let id = req.params.id;
+        let result = await db.simpleExecute("select message,seq_dept_mess_id from Sci_dept_messages where seq_dept_mess_id= :seq_dept_mess_id",[id]);
+        let droparray = new Array();
+        result.rows.forEach((row) => {
+            droparray.push(new BulletinVOResponse(row[0],row[1]));
+        });
+
+
+        return droparray;
+    }
     static async getDeptSprints(dept) {
 
         const result = await db.simpleExecute("select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate between sprint_start_date and sprint_end_Date  and sprint_dept = :dept union all select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+7 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept1", [dept, dept]
@@ -51,32 +76,31 @@ class bulletinService {
 
         let resultArray = new Array();
 
-        const result = await db.simpleExecute("SELECT        ab.created_by,        ab.message,        ab.assigned_to,        ab.ack_by,        ab.job_desc,        ab.targetdate,       ab.seq_dept_message_id    FROM        (            SELECT                ROWNUM  AS rn,              created_by,        message,        assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_message_id            FROM                sci_dept_messages  sj                where assigned_to like :dept_id                                   ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam, newPage, parseInt(newPage) + parseInt(pageSize)]
+        const result = await db.simpleExecute("SELECT     ab.assigned_to, ab.ack_by, ab.message, ab.job_desc,    ab.created_by,                                    ab.targetdate,       ab.seq_dept_mess_id  ,ab.original_filename ,ab.ack_comments FROM        (            SELECT                ROWNUM  AS rn,              created_by,        message,        assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_mess_id   ,original_filename   ,ack_comments      FROM                sci_dept_messages  sj                where assigned_to like :dept_id                                   ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam, newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
-            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],row[9],row[10]));
+            resultArray.push(new BulletinVO(row[0], row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8]));
         });
         return resultArray;
     }
 
     static async getAllCount() {
-        let result = await db.simpleExecute("select count(1) from sci_backlog_master");
+        let result = await db.simpleExecute("select count(1) from sci_dept_messages");
         let total = result.rows[0][0];
         return total;
     }
-    static async updateSprintToBackLog(req, id) {
+    static async updateBulletin(req, id) {
 
 
 
-        let seqSprintJobId = req.body.seq_sprint_job_id;
-        let seqBackLogId = req.body.seq_backlog_id;
+        let ack_message = req.body.ack_message;
+        let seq_dept_mess_id = req.body.seq_dept_mess_id;
 
-        db.simpleExecute(" update SCI_SPRINT_JOB_DETAILS jb set jb.user_task_status = 'BKLOG',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_sprint_job_id = :seq_sprint_job_id",
-            [ req.user,seqSprintJobId], {autoCommit: true});
+        db.simpleExecute(" update sci_dept_messages jb set jb.ACK_COMMENTS = :ack_comments,jb.ack_status='Y',jb.updated_date=sysdate,updated_by =:user_data ,ack_by =:ack_by where jb.SEQ_DEPT_MESS_ID = :SEQ_DEPT_MESS_ID",
+            [ack_message, req.user,req.user,seq_dept_mess_id], {autoCommit: true});
 
 
-        db.simpleExecute(" update SCI_BACKLOG_MASTER jb set jb.EPIC_STATUS = 'BKLOG',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_backlog_id = :seq_backlog_id",
-            [req.user,seqBackLogId], {autoCommit: true});
+
         return true;
     }
 
@@ -102,15 +126,31 @@ class bulletinService {
         let deptAssignedTo = req.body.dept_assigned_to;
 
         let targetDate = req.body.target_date;
-        let jobDesc = req.body.job_desc
-        console.log(targetDate);
-        let datefomart = this.formatDate(targetDate);
-        console.log(datefomart);
-        db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null )  ",
-            [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart], {autoCommit: true});
+        let jobDesc = req.body.workOrder_desc;
+        if(req.file) {
+            let filename = req.file.filename;
+            let originalFileName = req.file.originalname;
+            let mimeType = req.file.mimetype;
+
+            let datefomart = this.formatDate(targetDate);
+            console.log(datefomart);
+            db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS,ATTACH_FILENAME,ORIGINAL_FILENAME,CONTENT_TYPE) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null ,:filename,:originalName,:mimetype)  ",
+                [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart,filename,originalFileName,mimeType], {autoCommit: true});
+
+        }
+        else {
+            let datefomart = this.formatDate(targetDate);
+            console.log(datefomart);
+            db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS,ATTACH_FILENAME,ORIGINAL_FILENAME,CONTENT_TYPE) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null ,null,null,null)  ",
+                [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart], {autoCommit: true});
+
+
+        }
+
 
         return true;
     }
+
 
     static async saveSprint(req, id) {
 

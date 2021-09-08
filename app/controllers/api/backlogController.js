@@ -15,6 +15,18 @@ router.get(
     })
 );
 
+
+router.get(
+    '/find/:id',
+    authJwt(),
+    asyncHandler(async (req, res) => {
+        const result = await backLogService.getOne(req);
+
+        if (result.length === 0) { res.send({success:false, message:res.__('api.client.get.error')}); }
+        else { res.send({success: true, data: result}); }
+    })
+);
+
 router.get(
     '/all',
     authJwt(),
@@ -60,6 +72,17 @@ router.get(
     authJwt(),
     asyncHandler(async (req, res) => {
         const result = await epicService.getWorkOrders(req);
+
+        if (result.length === 0) { res.send({success:false, message:res.__('api.epic.get.error')}); }
+        else { res.send({success: true, data: result}); }
+    })
+);
+
+router.get(
+    '/workorder/backlog',
+    authJwt(),
+    asyncHandler(async (req, res) => {
+        const result = await backLogService.getWorkOrdersInBacklog(req);
 
         if (result.length === 0) { res.send({success:false, message:res.__('api.epic.get.error')}); }
         else { res.send({success: true, data: result}); }

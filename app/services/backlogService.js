@@ -57,6 +57,18 @@ class BacklogService {
         });
         return droparray;
     }
+
+    static async getWorkOrdersInBacklog(req) {
+
+        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGEN.sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y' and seq_work_id in (select seq_work_id from sci_backlog_master where epic_status = 'BKLOG')"
+        );
+        let droparray = new Array();
+        const gbp = new DropDown({ label: 'GBP', value: 'British Pounds' });
+        result.rows.forEach((row) => {
+            droparray.push(new DropDown(row[0],row[1]));
+        });
+        return droparray;
+    }
     static async getAll(req, page, pageSize) {
         let active = req.query.active || 'id';
         const order = req.query.order || 'desc';

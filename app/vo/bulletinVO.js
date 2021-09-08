@@ -1,7 +1,7 @@
 class BulletinVO {
 
 
-    constructor(message_created_by, message,dept_assigned_to,ack_by,job_desc,target_date,seq_dept_message_id) {
+    constructor(dept_assigned_to,ack_by,message,job_desc,message_created_by, target_date,seq_dept_mess_id,original_fileName,ack_comments) {
 
 
         this._dept_assigned_to = dept_assigned_to;
@@ -9,27 +9,14 @@ class BulletinVO {
         this._job_desc = job_desc;
         this._target_date = target_date;
         this._message_created_by = message_created_by;
+        this._dept_message = message;
+        this._seq_dept_mess_id = seq_dept_mess_id;
         this._message = message;
-        this._seq_dept_message_id = seq_dept_message_id;
+        this._original_fileName = original_fileName;
+        this._ack_comments = ack_comments;
 
     }
 
-
-    get message_created_by() {
-        return this._message_created_by;
-    }
-
-    set message_created_by(value) {
-        this._message_created_by = value;
-    }
-
-    get message() {
-        return this._message;
-    }
-
-    set message(value) {
-        this._message = value;
-    }
 
     get dept_assigned_to() {
         return this._dept_assigned_to;
@@ -47,12 +34,28 @@ class BulletinVO {
         this._ack_by = value;
     }
 
+    get message() {
+        return this._message;
+    }
+
+    set message(value) {
+        this._message = value;
+    }
+
     get job_desc() {
         return this._job_desc;
     }
 
     set job_desc(value) {
         this._job_desc = value;
+    }
+
+    get message_created_by() {
+        return this._message_created_by;
+    }
+
+    set message_created_by(value) {
+        this._message_created_by = value;
     }
 
     get target_date() {
@@ -63,12 +66,30 @@ class BulletinVO {
         this._target_date = value;
     }
 
-
-    get seq_dept_message_id() {
-        return this._seq_dept_message_id;
+    get seq_dept_mess_id() {
+        return this._seq_dept_mess_id;
     }
 
-    set seq_dept_message_id(value) {
-        this._seq_dept_message_id = value;
+    set seq_dept_mess_id(value) {
+        this._seq_dept_mess_id = value;
+    }
+
+
+    get original_fileName() {
+        return this._original_fileName;
+    }
+
+    set original_fileName(value) {
+        this._original_fileName = value;
+    }
+
+
+    get ack_comments() {
+        return this._ack_comments;
+    }
+
+    set ack_comments(value) {
+        this._ack_comments = value;
     }
 }
+module.exports = BulletinVO;
