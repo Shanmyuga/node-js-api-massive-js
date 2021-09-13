@@ -61,7 +61,7 @@ router.get(
         const result = await userService.checkPMRole(req);
 
         if (result.length === 0) { res.send({success:false, message:res.__('api.user.get.error')}); }
-        else { res.send({success: true}); }
+        else { res.send({success: true,data: result}); }
     })
 );
 

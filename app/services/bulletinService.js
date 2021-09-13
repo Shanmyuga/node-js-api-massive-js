@@ -66,17 +66,20 @@ class bulletinService {
         let active = req.query.active || 'id';
         const order = req.query.order || 'desc';
         let searchByDept = req.body.searchByDept || req.query.searchByDept;
-
+        let searchByAckStatus = req.body.searchByAckStatus || req.query.searchByAckStatus;
         const newPage = (page - 1) * pageSize;
         let searchByDeptParam = '%' + searchByDept + '%';
+        let searchByAckStatusParam = '%' + searchByAckStatus + '%';
         if (searchByDeptParam === undefined) {
             searchByDeptParam = '%%';
         }
-
+        if (searchByAckStatusParam === undefined) {
+            searchByAckStatusParam = '%%';
+        }
 
         let resultArray = new Array();
 
-        const result = await db.simpleExecute("SELECT     ab.assigned_to, ab.ack_by, ab.message, ab.job_desc,    ab.created_by,                                    ab.targetdate,       ab.seq_dept_mess_id  ,ab.original_filename ,ab.ack_comments FROM        (            SELECT                ROWNUM  AS rn,              created_by,        message,        assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_mess_id   ,original_filename   ,ack_comments      FROM                sci_dept_messages  sj                where assigned_to like :dept_id                                   ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam, newPage, parseInt(newPage) + parseInt(pageSize)]
+        const result = await db.simpleExecute("SELECT     ab.assigned_to, ab.ack_by, ab.message, ab.job_desc,    ab.created_by,                                    ab.targetdate,       ab.seq_dept_mess_id  ,ab.original_filename ,ab.ack_comments FROM        (            SELECT                ROWNUM  AS rn,              created_by,        message,        assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_mess_id   ,original_filename   ,ack_comments      FROM                sci_dept_messages  sj                where assigned_to like :dept_id         and ack_status like :ack_status                          ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam,searchByAckStatusParam, newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
             resultArray.push(new BulletinVO(row[0], row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8]));
@@ -96,7 +99,7 @@ class bulletinService {
         let ack_message = req.body.ack_message;
         let seq_dept_mess_id = req.body.seq_dept_mess_id;
 
-        db.simpleExecute(" update sci_dept_messages jb set jb.ACK_COMMENTS = :ack_comments,jb.ack_status='Y',jb.updated_date=sysdate,updated_by =:user_data ,ack_by =:ack_by where jb.SEQ_DEPT_MESS_ID = :SEQ_DEPT_MESS_ID",
+        db.simpleExecute(" update sci_dept_messages jb set jb.ACK_COMMENTS = :ack_comments,jb.ack_status='Y',jb.ack_Date = sysdate,jb.updated_date=sysdate,updated_by =:user_data ,ack_by =:ack_by where jb.SEQ_DEPT_MESS_ID = :SEQ_DEPT_MESS_ID",
             [ack_message, req.user,req.user,seq_dept_mess_id], {autoCommit: true});
 
 

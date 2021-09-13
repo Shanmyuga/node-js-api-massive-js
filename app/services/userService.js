@@ -24,8 +24,9 @@ class userService {
     }
     static async checkPMRole(req) {
         let id = req.params.id;
-        let result = await db.simpleExecute("select role_name from SCIGENICS_ROLE_MASTER where role_name = 'pmtrack' and seq_role_id in (select seq_role_id from SCI_USER_ROLE_DET ud,scigenics_user_master um  where ud.seq_user_id = um.seq_user_id and user_id = :userId)",[req.user]);
-        return result;
+        let result = await db.simpleExecute("select count(1) from SCIGENICS_ROLE_MASTER where role_name = 'pmtrack' and seq_role_id in (select seq_role_id from SCI_USER_ROLE_DET ud,scigenics_user_master um  where ud.seq_user_id = um.seq_user_id and user_id = :userId)",[req.user]);
+
+        return result.rows[0][0];
     }
     static async getAll(req, page, pageSize) {
         const active = req.query.active || 'id';
