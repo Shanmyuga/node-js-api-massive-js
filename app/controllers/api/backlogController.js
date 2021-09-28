@@ -38,7 +38,7 @@ router.get(
         if (result.length === 0) {
             res.send({success:false, message:res.__('api.client.get.empty')});
         } else {
-            let total = await backLogService.getAllCount();
+            let total = await backLogService.getAllCount(req);
             res.send({success: true, data: result, total: total, pageSize, page: page});
         }
     })
