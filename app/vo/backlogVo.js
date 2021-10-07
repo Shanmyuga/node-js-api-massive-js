@@ -1,7 +1,7 @@
 class BackLogValueObject {
 
 
-    constructor(dept_id, epic_desc,user_story_id,user_story_task,epic_status,job_desc,seq_work_id,seq_backlog_id) {
+    constructor(dept_id, epic_desc,user_story_id,user_story_task,epic_status,job_desc,seq_work_id,seq_backlog_id,sprint_count) {
         this._dept_id = dept_id;
 
         this._epic_desc = epic_desc;
@@ -11,6 +11,7 @@ class BackLogValueObject {
         this._job_desc = job_desc;
         this._seq_work_id = seq_work_id;
         this._seq_backlog_id = seq_backlog_id;
+        this._sprint_count = sprint_count;
     }
 
 
@@ -80,6 +81,15 @@ class BackLogValueObject {
 
     set epic_status(value) {
         this._epic_status = value;
+    }
+
+
+    get sprint_count() {
+        return this._sprint_count;
+    }
+
+    set sprint_count(value) {
+        this._sprint_count = value;
     }
 }
 
