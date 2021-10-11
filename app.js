@@ -11,8 +11,9 @@ let database = require('./db/dataBase');
 const app = express();
 app.listen(3000);
 init(app);
+const args = process.argv.slice(2)
 
-database.initialize();
+database.initialize(args[0]);
 
 //Set locale
 i18n.configure({

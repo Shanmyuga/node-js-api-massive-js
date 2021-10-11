@@ -7,14 +7,22 @@ const CONSTANTS = require('../app/utils/constants');
 
     
 
-       //oracledb.initOracleClient({libDir: '/Users/prakash/Downloads/instantclient_19_8'});
-oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_12'});
+      // oracledb.initOracleClient({libDir: '/usr/lib/oracle/19.3/client64/lib'});
+//oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_11'});
 
 
 
-async function initialize() {
+async function initialize(env) {
+
     console.log("initialize");
-    await   oracledb.createPool(dbConfig.scigenicsdb);
+    if(env === "remote") {
+        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_11'});
+        await oracledb.createPool(dbConfig.scigenicsDbRemote);
+    }
+    if(env === "local") {
+        oracledb.initOracleClient({libDir: '/usr/lib/oracle/19.3/client64/lib'});
+        await oracledb.createPool(dbConfig.scigenicsDblocal);
+    }
 }
 
 module.exports.initialize = initialize;
