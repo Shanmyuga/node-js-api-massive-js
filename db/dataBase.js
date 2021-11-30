@@ -28,6 +28,12 @@ async function initialize(env) {
 oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_11'});
         await oracledb.createPool(dbConfig.scigenicsDbRemote);
     }
+
+    if(env === "office") {
+        //oracledb.initOracleClient({libDir: '/usr/lib/oracle/19.3/client64/lib'});
+        oracledb.initOracleClient({libDir: 'C:\\oracleclient\\product\\12.2.0\\client_1\\instantclient_19_12'});
+        await oracledb.createPool(dbConfig.scigenicsDbRemote);
+    }
 }
 
 module.exports.initialize = initialize;

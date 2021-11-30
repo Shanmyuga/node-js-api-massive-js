@@ -63,7 +63,7 @@ class epicService {
 
     static async getWorkOrders(req) {
 
-        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGEN.sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y'"
+        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGENICS.sci_workorder_master where word_order_Type = 'Fermenter' and wo_Status='Y'"
         );
         let droparray = new Array();
         const gbp = new DropDown({ label: 'GBP', value: 'British Pounds' });
@@ -124,8 +124,8 @@ class epicService {
 
 
             db.simpleExecute("delete from sci_backlog_master where DEPT_ID=:dept_id and user_story_id =:story_id",[dept_id,user_story_id],{autoCommit:true});
-            db.simpleExecute("    INSERT INTO \"SCIGENICS\".\"SCI_BACKLOG_MASTER\" (          seq_backlog_id,          dept_id,          user_story_task,          epic_desc,          user_story_id,          created_date,          created_by,          epic_status,          updated_by,          updated_date,          workorder_ref     ,seq_work_id ) VALUES (          sci_backlog_master_seq.NEXTVAL,          :dept_id,        :user_story_task_desc,        (select distinct epic_desc from SCI_STANDARD_EPIC_DATA where epic_id = :epic_id),          :user_story_id,          sysdate,         :logged_in_user,         'BKLOG',           :logged_in_user,        sysdate,          :work_order_ref,          (select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref)      )",
-                [dept_id,user_story_desc,standardEpicId,user_story_id,req.user,req.user,workOrderDesc,workOrderDesc] ,{ autoCommit: true });
+            db.simpleExecute("    INSERT INTO \"SCIGENICS\".\"SCI_BACKLOG_MASTER\" (          seq_backlog_id,          dept_id,          user_story_task,          epic_desc,          user_story_id,          created_date,          created_by,          epic_status,          updated_by,          updated_date,          workorder_ref     ,seq_work_id ) VALUES (          sci_backlog_master_seq.NEXTVAL,          :dept_id,        :user_story_task_desc,        (select distinct epic_desc from SCI_STANDARD_EPIC_DATA where epic_id = :epic_id and dept_id = :dept_id),          :user_story_id,          sysdate,         :logged_in_user,         'BKLOG',           :logged_in_user,        sysdate,          :work_order_ref,          (select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref)      )",
+                [dept_id,user_story_desc,standardEpicId,dept_id,user_story_id,req.user,req.user,workOrderDesc,workOrderDesc] ,{ autoCommit: true });
 
 
 
