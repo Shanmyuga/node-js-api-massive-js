@@ -36,10 +36,10 @@ class bulletinService {
 
     static async getBulletinMessage(req) {
         let id = req.params.id;
-        let result = await db.simpleExecute("select message,seq_dept_mess_id from Sci_dept_messages where seq_dept_mess_id= :seq_dept_mess_id",[id]);
+        let result = await db.simpleExecute("select message,seq_dept_mess_id,ack_comments from Sci_dept_messages where seq_dept_mess_id= :seq_dept_mess_id",[id]);
         let droparray = new Array();
         result.rows.forEach((row) => {
-            droparray.push(new BulletinVOResponse(row[0],row[1]));
+            droparray.push(new BulletinVOResponse(row[0],row[1],row[2]));
         });
 
 

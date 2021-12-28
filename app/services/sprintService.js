@@ -1,6 +1,7 @@
 let db = require('../../db/dataBase');
 const oracledb = require("oracledb");
 let DropDown = require('../vo/dropdown');
+let BacklogVo = require('../vo/BackLogHistoryVO');
 let sprintValueObject = require('../vo/sprintVO');
 
 class sprintService {
@@ -36,6 +37,19 @@ class sprintService {
         return droparray;
     }
 
+
+    static async getStoryComments(req) {
+
+        let seqBackLogId = req.params.id;
+        const result = await db.simpleExecute("select USER_COMMENTS, (select sprint_name from SCI_SPRINT_JOB_DETAILS jd where scm.SEQ_SPRINT_JOB_ID=jd.SEQ_SPRINT_JOB_ID) as sprint_name, UPDATED_DATE, UPDATED_BY , ASSIGNED_TO from sci_sprint_story_comments scm where seq_backlog_id = :bklog order by updated_Date asc", [seqBackLogId]
+        );
+        let droparray = new Array();
+
+        result.rows.forEach((row) => {
+            droparray.push(new BacklogVo(row[0], row[1],row[2],row[3],row[4]));
+        });
+        return droparray;
+    }
     static async getSprintDataByName(sprintName) {
 
         const result = await db.simpleExecute("select  bm.dept_id ,bm.epic_desc ,bm.user_story_id ,bm.user_story_task,bm.epic_status ,bm.workorder_ref,bm.seq_work_id ,sj.seq_backlog_id ,sj.seq_sprint_job_id  from Sci_sprint_job_details sj  ,SCI_BACKLOG_MASTER bm where sj.seq_backlog_id = bm.seq_backlog_id and sprint_name = :sprint_name  ", [sprintName]
@@ -73,7 +87,7 @@ class sprintService {
     }
     static async getWorkOrders(req) {
 
-        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGEN.sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y'"
+        const result = await db.simpleExecute("select job_Desc ,seq_work_id from sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y'"
         );
         let droparray = new Array();
         const gbp = new DropDown({label: 'GBP', value: 'British Pounds'});
@@ -123,6 +137,8 @@ class sprintService {
 
         db.simpleExecute(" update SCI_BACKLOG_MASTER jb set jb.EPIC_STATUS = 'BKLOG',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_backlog_id = :seq_backlog_id",
             [req.user,seqBackLogId], {autoCommit: true});
+        db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , :SEQ_SPRINT_JOB_ID,:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
+            [seqSprintJobId, "RETURN TO BACKLOG BY THE SPRINT UPDATE", seqBackLogId, req.user,null], {autoCommit: true});
         return true;
     }
 
@@ -139,6 +155,9 @@ class sprintService {
 
         db.simpleExecute(" update SCI_BACKLOG_MASTER jb set jb.EPIC_STATUS = 'COMPLETE',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_backlog_id = :seq_backlog_id",
             [req.user,seqBackLogId], {autoCommit: true});
+
+        db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , :SEQ_SPRINT_JOB_ID,:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
+            [seqSprintJobId, "COMPLETED BY THE SPRINT UPDATE", seqBackLogId, req.user,null], {autoCommit: true});
         return true;
     }
     static async save(req, id) {
@@ -163,6 +182,9 @@ class sprintService {
 
                 db.simpleExecute(" update SCI_BACKLOG_MASTER jb set jb.EPIC_STATUS = 'COMPLETE',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_backlog_id = :seq_backlog_id",
                     [req.user,seqBackLogId], {autoCommit: true});
+
+                db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , :SEQ_SPRINT_JOB_ID,:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
+                    [seqSprintJobId, "COMPLETED BY THE SPRINT UPDATE", seqBackLogId, req.user,null], {autoCommit: true});
             }
 
             if(req.body.action === "bklog") {
@@ -175,6 +197,8 @@ class sprintService {
 
                 db.simpleExecute(" update SCI_BACKLOG_MASTER jb set jb.EPIC_STATUS = 'BKLOG',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_backlog_id = :seq_backlog_id",
                     [req.user,seqBackLogId], {autoCommit: true});
+                db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , :SEQ_SPRINT_JOB_ID,:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
+                    [seqSprintJobId, "RETURN TO BACKLOG BY THE SPRINT UPDATE", seqBackLogId, req.user,null], {autoCommit: true});
             }
 
         return true;

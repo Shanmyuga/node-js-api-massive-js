@@ -78,6 +78,17 @@ router.get(
 );
 
 router.get(
+    '/story/comments/:id',
+    authJwt(),
+    asyncHandler(async (req, res) => {
+        const result = await sprintService.getStoryComments(req);
+
+        if (result.length === 0) { res.send({success:false, message:res.__('api.epic.get.error')}); }
+        else { res.send({success: true, data: result}); }
+    })
+);
+
+router.get(
     '/users/all',
     authJwt(),
     asyncHandler(async (req, res) => {

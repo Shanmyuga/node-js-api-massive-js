@@ -48,7 +48,7 @@ class BacklogService {
 
     static async getWorkOrders(req) {
 
-        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGEN.sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y'"
+        const result = await db.simpleExecute("select job_Desc ,seq_work_id from sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y'"
         );
         let droparray = new Array();
         const gbp = new DropDown({ label: 'GBP', value: 'British Pounds' });
@@ -60,7 +60,7 @@ class BacklogService {
 
     static async getWorkOrdersInBacklog(req) {
 
-        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGEN.sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y' and seq_work_id in (select seq_work_id from sci_backlog_master where epic_status = 'BKLOG')"
+        const result = await db.simpleExecute("select job_Desc ,seq_work_id from sci_workorder_master where word_order_Type = 'Fermenter' and wo_status = 'Y' and seq_work_id in (select seq_work_id from sci_backlog_master where epic_status = 'BKLOG')"
         );
         let droparray = new Array();
         const gbp = new DropDown({ label: 'GBP', value: 'British Pounds' });
@@ -145,13 +145,15 @@ class BacklogService {
         let seq_backlog_id = req.body.seq_backlog_id;
 
 
-           let result =  db.simpleExecute("select seq_sprint_id from SCI_SPRINT_JOB_DETAILS where SEQ_SPRINT_ID=:seq_sprint_id and seq_backlog_id = :seq_backlog_id",[seq_sprint_id,seq_backlog_id]);
-           if(result.length) {
+           const result =  await db.simpleExecute("select seq_sprint_id from SCI_SPRINT_JOB_DETAILS where SEQ_SPRINT_ID=:seq_sprint_id and seq_backlog_id = :seq_backlog_id",[seq_sprint_id,seq_backlog_id]);
+           if(result.rows.length > 0) {
                db.simpleExecute("update SCI_SPRINT_JOB_DETAILS set user_task_status = 'IN_SPRINT' where SEQ_SPRINT_ID = :seq_sprint_id and seq_backlog_id = :seq_backlog_id  ",[seq_sprint_id,seq_backlog_id],{autocommit:true});
 
            }
            else {
                db.simpleExecute("insert into  SCI_SPRINT_JOB_DETAILS( SEQ_SPRINT_JOB_ID, SEQ_SPRINT_ID, SEQ_BACKLOG_ID, INSERTED_DATE, INSERTED_BY, USER_TASK_STATUS, ASSIGNED_TO, UPDATED_BY,updated_date,SPRINT_NAME) values (SCI_SPRINT_JOB_DETAILS_SEQ.nextval,:SEQ_SPRINT_NO,:SEQ_BACKLOG_ID,sysdate,:INSERTED_BY,'IN_SPRINT',null,:UPDATED_BY,sysdate,(select sprint_name from sci_sprint_master where seq_Sprint_id = :seq_Sprint))",[seq_sprint_id,seq_backlog_id,req.user,req.user,seq_sprint_id],{autoCommit:true});
+               db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , (select max(SEQ_SPRINT_JOB_ID) from SCI_SPRINT_JOB_DETAILS jd where jd.SEQ_BACKLOG_ID=:bklogId ),:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
+                   [ seq_backlog_id,"ADDED TO SPRINT BY THE SPRINT UPDATE", seq_backlog_id, req.user,null], {autoCommit: true});
 
            }
             db.simpleExecute("update SCI_BACKLOG_MASTER set EPIC_STATUS = 'IN_SPRINT' ,updated_by = :updated_by,updated_date = sysdate where seq_backlog_id = :seq_backlog_id ",
