@@ -79,10 +79,10 @@ class bulletinService {
 
         let resultArray = new Array();
 
-        const result = await db.simpleExecute("SELECT     ab.assigned_to, ab.ack_by, ab.message, ab.job_desc,    ab.created_by,                                    ab.targetdate,       ab.seq_dept_mess_id  ,ab.original_filename ,ab.ack_comments FROM        (            SELECT                ROWNUM  AS rn,              created_by,        message,        assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_mess_id   ,original_filename   ,ack_comments      FROM                sci_dept_messages  sj                where assigned_to like :dept_id         and ack_status like :ack_status                          ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam,searchByAckStatusParam, newPage, parseInt(newPage) + parseInt(pageSize)]
+        const result = await db.simpleExecute("SELECT     ab.assigned_to, ab.ack_by, ab.message ,ab.job_desc,    ab.created_by,     ab.updated_date ,                               ab.targetdate,       ab.seq_dept_mess_id  ,ab.original_filename ,ab.ack_comments FROM        (            SELECT                ROWNUM  AS rn,     TO_CHAR(updated_Date, 'DD-MM-YYYY HH:MI:SS') as updated_Date ,         created_by,        message,       assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_mess_id   ,original_filename   ,ack_comments      FROM                sci_dept_messages  sj                where assigned_to like :dept_id         and ack_status like :ack_status                          ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam,searchByAckStatusParam, newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
-            resultArray.push(new BulletinVO(row[0], row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8]));
+            resultArray.push(new BulletinVO(row[0], row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8],row[9]));
         });
         return resultArray;
     }

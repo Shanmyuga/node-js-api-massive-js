@@ -70,35 +70,56 @@ class BacklogService {
         return droparray;
     }
     static async getAll(req, page, pageSize) {
-        let active = req.query.active || 'id';
+        let active = req.query.active || 'epic_desc';
 
         const order = req.query.order || 'desc';
         let searchByDept = req.body.searchByDept || req.query.searchByDept;
         let searchByDesc = req.body.searchByDesc || req.query.searchByDesc;
         let searchByWork = req.body.searchByWork || req.query.searchByWork;
+        let searchByTaskDesc = req.body.searchByTaskDesc || req.query.searchByTaskDesc;
         let searchByWorkDesc = req.body.searchByWorkDesc || req.query.searchByWorkDesc;
+        let searchByStageDesc = req.body.searchByStageDesc || req.query.searchByStageDesc;
         let searchByStatus = req.body.searchByStatus || req.query.searchByStatus;
-        const newPage = (page -1) * pageSize;
-        let searchByDeptParam = '%'+searchByDept+'%';
-        if (searchByDeptParam === undefined) {searchByDeptParam = '%%';}
+        const newPage = (page - 1) * pageSize;
+        let searchByDeptParam = '%' + searchByDept + '%';
+        if (searchByDeptParam === undefined) {
+            searchByDeptParam = '%%';
+        }
 
-        let searchByDescParam = '%'+searchByDesc+'%';
-        if (searchByDescParam === undefined) {searchByDescParam = '%%';}
+        let searchByDescParam = '%' + searchByDesc + '%';
+        if (searchByDescParam === undefined) {
+            searchByDescParam = '%%';
+        }
 
-        let searchByWorkDescParam = '%'+searchByWorkDesc+'%';
-        if (searchByWorkDescParam === undefined) {searchByWorkDescParam = '%%';}
-        let searchByWorkParam = '%'+searchByWork+'%';
-        if (searchByWorkParam === undefined) {searchByWorkParam = '%%';}
+        let searchByWorkDescParam = '%' + searchByWorkDesc + '%';
+        if (searchByWorkDescParam === undefined) {
+            searchByWorkDescParam = '%%';
+        }
+        let searchByWorkParam = '%' + searchByWork + '%';
+        if (searchByWorkParam === undefined) {
+            searchByWorkParam = '%%';
+        }
+        let searchByStageDescParam = '%' + searchByStageDesc + '%';
+        if (searchByStageDescParam === undefined) {
+            searchByStageDescParam = '%%';
+        }
+        let searchByTaskDescParam = '%' + searchByTaskDesc + '%';
+        if (searchByTaskDescParam === undefined) {
+            searchByTaskDescParam = '%%';
+        }
         let resultArray = new Array();
-        let query ='select ab.dept_id ,ab.epic_desc, ab.user_story_id,ab.user_story_task ,ab.epic_status ,ab.workorder_ref,ab.seq_work_id,ab.seq_backlog_id ,SPRINT_COUNT from  (select rownum as rn ,dept_id,epic_desc, user_story_id,user_story_task,epic_status ,workorder_ref,seq_work_id,seq_backlog_id,(Select count(1) from sci_sprint_job_details jb where jb.seq_backlog_id = bm.seq_backlog_id ) as SPRINT_COUNT from SCI_BACKLOG_MASTER bm where epic_status =:search0 and  dept_id like :search1 and epic_desc like :search2 and seq_work_id like :search3  and workorder_ref like :search4 order by ' + active + ' '+ order + ' ) ab where ab.rn between :startlimit and :endlimit ';
+        let query = 'select ab.dept_id ,ab.epic_desc,ab.stage_desc, ab.user_story_id,ab.user_story_task ,ab.epic_status ,ab.workorder_ref,ab.seq_work_id,ab.seq_backlog_id ,SPRINT_COUNT from  (select rownum as rn ,dept_id,epic_desc, stage_desc, user_story_id,user_story_task,epic_status ,workorder_ref,seq_work_id,seq_backlog_id,(Select count(1) from sci_sprint_job_details jb where jb.seq_backlog_id = bm.seq_backlog_id ) as SPRINT_COUNT from SCI_BACKLOG_MASTER bm where epic_status =:search0 and  dept_id like :search1 and epic_desc like :search2 and seq_work_id like :search3  and workorder_ref like :search4 and stage_desc like :search5 and user_story_task like :search6 order by ' + active + ' ' + order + ' ) ab where ab.rn between :startlimit and :endlimit ';
         console.log(query);
-        const result = await db.simpleExecute(query,[searchByStatus,searchByDeptParam,searchByDescParam,searchByWorkParam,searchByWorkDescParam,newPage,parseInt(newPage) +parseInt(pageSize)]
+        const result = await db.simpleExecute(query, [searchByStatus, searchByDeptParam, searchByDescParam, searchByWorkParam, searchByWorkDescParam,searchByStageDescParam, searchByTaskDescParam,newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
-            resultArray.push(new BackLogValueObject(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]));
+            {
+                resultArray.push(new BackLogValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10]));
+            }
         });
-        return resultArray;
-    }
+            return resultArray;
+        }
+
 
     static async getAllCount(req) {
 
