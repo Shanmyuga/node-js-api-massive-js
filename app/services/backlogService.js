@@ -15,10 +15,10 @@ class BacklogService {
     static async getOne(req) {
         let id = req.params.id;
         let resultArray = new Array();
-        const result = await db.simpleExecute("select dept_id, epic_desc,user_story_id, user_story_task ,epic_status,workorder_ref,seq_work_id,seq_backlog_id from SCI_BACKLOG_MASTER where SEQ_BACKLOG_ID = :SEQ_BACKLOG_ID",[id]);
+        const result = await db.simpleExecute("select dept_id, epic_desc,stage_desc,user_story_id, user_story_task ,epic_status,workorder_ref,seq_work_id,seq_backlog_id from SCI_BACKLOG_MASTER where SEQ_BACKLOG_ID = :SEQ_BACKLOG_ID",[id]);
 
         result.rows.forEach((row) => {
-            resultArray.push(new BackLogValueObject(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7]));
+            resultArray.push(new BackLogValueObject(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]));
         });
         return resultArray;
     }
