@@ -27,12 +27,14 @@ class sprintService {
 
     static async getDeptSprints(dept) {
 
-        const result = await db.simpleExecute("select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate between sprint_start_date and sprint_end_Date  and sprint_dept = :dept union all select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+7 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept1", [dept, dept]
+        const result = await db.simpleExecute("select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate between sprint_start_date and sprint_end_Date  and sprint_dept = :dept union  select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+7 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept1 union  select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+8 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept2", [dept, dept,dept]
         );
         let droparray = new Array();
 
-        result.rows.forEach((row) => {
-            droparray.push(new DropDown(row[1], row[0]));
+        result.rows.forEach((row,index) => {
+            if(index <2) {
+                droparray.push(new DropDown(row[1], row[0]));
+            }
         });
         return droparray;
     }
@@ -101,13 +103,16 @@ class sprintService {
         let active = req.query.active || 'id';
         const order = req.query.order || 'desc';
         let searchByName = req.body.searchByName || req.query.searchByName;
-
+        let searchByWO = req.body.searchByWO || req.query.searchByWO;
         const newPage = (page - 1) * pageSize;
         let searchByNameParam = '%' + searchByName + '%';
         if (searchByNameParam === undefined) {
             searchByNameParam = '%%';
         }
-
+        let searchByWOParam = '%' + searchByWO + '%';
+        if (searchByWOParam === undefined) {
+            searchByWOParam = '%%';
+        }
 
         let resultArray = new Array();
 

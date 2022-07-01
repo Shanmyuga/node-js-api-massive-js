@@ -118,14 +118,22 @@ class epicService {
         console.log(req.user);
         let dept_id = req.body.dept_id;
         let workOrderDesc = req.body.workOrder_desc;
+        let internal_bklog_ref = req.body.internal_bklog_ref;
         let user_story_id = req.body.custom_user_story_id;
         let user_story_desc = req.body.custom_user_story_desc;
         let standardEpicId = req.body.standard_epic_id;
-
+        let arrayinternalId = internal_bklog_ref.split(',');
+for(let entry of arrayinternalId) {
+    let result = await db.simpleExecute("select count(1) from sci_Standard_epic_Data where dept_id = :dept_id and epic_id = :epic_id and seq_St_epic_id =:entry  ", [dept_id, standardEpicId,entry]);
+    let total = result.rows[0][0];
+    if (total == 0) {
+        return false;
+    }
+}
 
             db.simpleExecute("delete from sci_backlog_master where DEPT_ID=:dept_id and user_story_id =:story_id",[dept_id,user_story_id],{autoCommit:true});
-            db.simpleExecute("    INSERT INTO \"SCIGENICS\".\"SCI_BACKLOG_MASTER\" (          seq_backlog_id,          dept_id,          user_story_task,          epic_desc,          user_story_id,          created_date,          created_by,          epic_status,          updated_by,          updated_date,          workorder_ref     ,seq_work_id ) VALUES (          sci_backlog_master_seq.NEXTVAL,          :dept_id,        :user_story_task_desc,        (select distinct epic_desc from SCI_STANDARD_EPIC_DATA where epic_id = :epic_id and dept_id = :dept_id and rownum =1),          :user_story_id,          sysdate,         :logged_in_user,         'BKLOG',           :logged_in_user,        sysdate,          :work_order_ref,          (select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref and rownum = 1)      )",
-                [dept_id,user_story_desc,standardEpicId,dept_id,user_story_id,req.user,req.user,workOrderDesc,workOrderDesc] ,{ autoCommit: true });
+            db.simpleExecute("    INSERT INTO \"SCIGENICS\".\"SCI_BACKLOG_MASTER\" (          seq_backlog_id,          dept_id,          user_story_task,          epic_desc,          user_story_id,          created_date,          created_by,          epic_status,          updated_by,          updated_date,          workorder_ref     ,seq_work_id ,REFERENCE_EPICS) VALUES (          sci_backlog_master_seq.NEXTVAL,          :dept_id,        :user_story_task_desc,        (select distinct epic_desc from SCI_STANDARD_EPIC_DATA where epic_id = :epic_id and dept_id = :dept_id and rownum =1),          :user_story_id,          sysdate,         :logged_in_user,         'BKLOG',           :logged_in_user,        sysdate,          :work_order_ref,          (select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref and rownum = 1) ,:internal_ref      )",
+                [dept_id,user_story_desc,standardEpicId,dept_id,user_story_id,req.user,req.user,workOrderDesc,workOrderDesc,internal_bklog_ref] ,{ autoCommit: true });
 
 
 
