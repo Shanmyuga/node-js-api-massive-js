@@ -17,10 +17,10 @@ class sprintService {
     static async getOne(req) {
         let id = req.params.id;
         let resultArray = new Array();
-        const result = await db.simpleExecute("SELECT      bm.dept_id,      bm.epic_desc,      bm.user_story_id,      bm.user_story_task,      bm.epic_status,      bm.workorder_ref,      bm.seq_work_id,      bm.seq_backlog_id,      sj.seq_sprint_job_id  FROM      sci_backlog_master bm,      sci_sprint_job_details sj  WHERE  sj.seq_backlog_id = bm.seq_backlog_id      and sj.seq_sprint_job_id = :seq_sprint_job_id", [id]);
+        const result = await db.simpleExecute("SELECT      bm.dept_id,      bm.epic_desc,      bm.user_story_id,      bm.user_story_task,      sj.user_task_status,      bm.workorder_ref,      bm.seq_work_id,      bm.seq_backlog_id,      sj.seq_sprint_job_id,bm.REFERENCE_EPICS  FROM      sci_backlog_master bm,      sci_sprint_job_details sj  WHERE  sj.seq_backlog_id = bm.seq_backlog_id      and sj.seq_sprint_job_id = :seq_sprint_job_id", [id]);
 
         result.rows.forEach((row) => {
-            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],row[8]));
+            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],row[8],row[9]));
         });
         return resultArray;
     }
@@ -54,12 +54,12 @@ class sprintService {
     }
     static async getSprintDataByName(sprintName) {
 
-        const result = await db.simpleExecute("select  bm.dept_id ,bm.epic_desc ,bm.user_story_id ,bm.user_story_task,bm.epic_status ,bm.workorder_ref,bm.seq_work_id ,sj.seq_backlog_id ,sj.seq_sprint_job_id  from Sci_sprint_job_details sj  ,SCI_BACKLOG_MASTER bm where sj.seq_backlog_id = bm.seq_backlog_id and sprint_name = :sprint_name  ", [sprintName]
+        const result = await db.simpleExecute("select  bm.dept_id ,bm.epic_desc ,bm.user_story_id ,bm.user_story_task,bm.epic_status ,bm.workorder_ref,bm.seq_work_id ,sj.seq_backlog_id ,sj.seq_sprint_job_id ,bm.REFERENCE_EPICS from Sci_sprint_job_details sj  ,SCI_BACKLOG_MASTER bm where sj.seq_backlog_id = bm.seq_backlog_id and sprint_name = :sprint_name  ", [sprintName]
         );
 
         let resultArray = new Array();
         result.rows.forEach((row) => {
-            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]));
+            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],row[9]));
         });
         return resultArray;
     }
@@ -116,10 +116,10 @@ class sprintService {
 
         let resultArray = new Array();
 
-        const result = await db.simpleExecute("SELECT     ab.dept_id,     ab.epic_desc,     ab.user_story_id,     ab.user_story_task,     ab.epic_status,     ab.workorder_ref,     ab.seq_work_id,     ab.seq_backlog_id,     ab.seq_sprint_job_id,     ab.assigned_to,     ab.comments FROM     (         SELECT             ROWNUM  AS rn,             sj.seq_sprint_job_id,             bm.dept_id,             bm.epic_desc,             bm.user_story_id,             bm.user_story_task,             bm.epic_status,             bm.workorder_ref,             bm.seq_work_id,             sj.seq_backlog_id,             (                 SELECT                     assigned_to                 FROM                     sci_sprint_story_comments cm                 WHERE                     cm.seq_story_rm_id = (                         SELECT                             MAX(seq_story_rm_id)                         FROM                             sci_sprint_story_comments ct                         WHERE                             ct.seq_sprint_job_id = sj.seq_sprint_job_id                     )             )       AS assigned_to,             (                 SELECT                     user_comments                 FROM                     sci_sprint_story_comments cm                 WHERE                     cm.seq_story_rm_id = (                         SELECT                             MAX(seq_story_rm_id)                         FROM                             sci_sprint_story_comments ct                         WHERE                             ct.seq_sprint_job_id = sj.seq_sprint_job_id                     )             )       AS comments         FROM             sci_sprint_job_details  sj,             sci_backlog_master      bm         WHERE                 sj.seq_backlog_id = bm.seq_backlog_id             AND sj.sprint_name LIKE :sprint_name     ) ab WHERE     ab.rn BETWEEN :startlimit AND :endlimit", [searchByNameParam, newPage, parseInt(newPage) + parseInt(pageSize)]
+        const result = await db.simpleExecute("SELECT     ab.dept_id,     ab.epic_desc,     ab.user_story_id,     ab.user_story_task,     ab.user_task_status,     ab.workorder_ref,     ab.seq_work_id,     ab.seq_backlog_id,     ab.seq_sprint_job_id,    ab.REFERENCE_EPICS, ab.assigned_to,     ab.comments FROM     (         SELECT             ROWNUM  AS rn,             sj.seq_sprint_job_id,  bm.REFERENCE_EPICS,           bm.dept_id,             bm.epic_desc,             bm.user_story_id,             bm.user_story_task,             sj.user_task_status,             bm.workorder_ref,             bm.seq_work_id,             sj.seq_backlog_id,             (                 SELECT                     assigned_to                 FROM                     sci_sprint_story_comments cm                 WHERE                     cm.seq_story_rm_id = (                         SELECT                             MAX(seq_story_rm_id)                         FROM                             sci_sprint_story_comments ct                         WHERE                             ct.seq_sprint_job_id = sj.seq_sprint_job_id                     )             )       AS assigned_to,             (                 SELECT                     user_comments                 FROM                     sci_sprint_story_comments cm                 WHERE                     cm.seq_story_rm_id = (                         SELECT                             MAX(seq_story_rm_id)                         FROM                             sci_sprint_story_comments ct                         WHERE                             ct.seq_sprint_job_id = sj.seq_sprint_job_id                     )             )       AS comments         FROM             sci_sprint_job_details  sj,             sci_backlog_master      bm         WHERE                 sj.seq_backlog_id = bm.seq_backlog_id             AND sj.sprint_name LIKE :sprint_name     ) ab WHERE     ab.rn BETWEEN :startlimit AND :endlimit", [searchByNameParam, newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
-            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],row[9],row[10]));
+            resultArray.push(new sprintValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],row[9],row[10],row[11]));
         });
         return resultArray;
     }
@@ -173,6 +173,7 @@ class sprintService {
 
         let seqSprintJobId = req.body.seq_sprint_job_id;
         let comments = req.body.comments;
+        let referece_comments = req.body.reference_comments;
         let assigned_to = req.body.assigned_to;
             db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , :SEQ_SPRINT_JOB_ID,:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
                 [seqSprintJobId, comments, seqBacklogId, req.user,assigned_to], {autoCommit: true});
@@ -181,8 +182,8 @@ class sprintService {
                 let seqSprintJobId = req.body.seq_sprint_job_id;
                 let seqBackLogId = req.body.seq_backlog_id;
 
-                db.simpleExecute(" update SCI_SPRINT_JOB_DETAILS jb set jb.user_task_status = 'COMPLETE',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_sprint_job_id = :seq_sprint_job_id",
-                    [ req.user,seqSprintJobId], {autoCommit: true});
+                db.simpleExecute(" update SCI_SPRINT_JOB_DETAILS jb set jb.user_task_status = 'COMPLETE', jb.completed_tasks =:reference_epic,jb.updated_date=sysdate,updated_by =:user_data where jb.seq_sprint_job_id = :seq_sprint_job_id",
+                    [ referece_comments,req.user,seqSprintJobId], {autoCommit: true});
 
 
                 db.simpleExecute(" update SCI_BACKLOG_MASTER jb set jb.EPIC_STATUS = 'COMPLETE',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_backlog_id = :seq_backlog_id",
@@ -190,6 +191,14 @@ class sprintService {
 
                 db.simpleExecute(" Insert into SCI_SPRINT_STORY_COMMENTS (SEQ_STORY_RM_ID, SEQ_SPRINT_JOB_ID, USER_COMMENTS, SEQ_BACKLOG_ID, UPDATED_BY, UPDATED_DATE, ASSIGNED_TO) values ( SCI_SPRINT_STORY_COMMENT_SEQ.nextval , :SEQ_SPRINT_JOB_ID,:USER_COMMENTS,:SEQ_BACKLOG_ID,:USER_data,sysdate ,:ASSIGNED_TO)   ",
                     [seqSprintJobId, "COMPLETED BY THE SPRINT UPDATE", seqBackLogId, req.user,null], {autoCommit: true});
+
+
+                let arrayinternalId = referece_comments.split(',');
+                for(let entry of arrayinternalId) {
+                    db.simpleExecute(" update SCI_BACKLOG_MASTER jb set jb.EPIC_STATUS = 'COMPLETE',jb.updated_date=sysdate,updated_by =:user_data where jb.seq_backlog_id = :seq_backlog_id",
+                        [req.user,entry], {autoCommit: true});
+
+                }
             }
 
             if(req.body.action === "bklog") {

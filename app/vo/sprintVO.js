@@ -1,7 +1,7 @@
 class SprintVO {
 
 
-    constructor(dept_id, epic_desc,user_story_id,user_story_task,epic_status,job_desc,seq_work_id,seq_backlog_id,seq_sprint_job_id,assigned_to,comments) {
+    constructor(dept_id, epic_desc,user_story_id,user_story_task,epic_status,job_desc,seq_work_id,seq_backlog_id,seq_sprint_job_id,reference_comments,assigned_to,comments) {
         this._dept_id = dept_id;
 
         this._epic_desc = epic_desc;
@@ -12,8 +12,10 @@ class SprintVO {
         this._seq_work_id = seq_work_id;
         this._seq_backlog_id = seq_backlog_id;
         this._seq_sprint_job_id = seq_sprint_job_id;
+        this._reference_comments = reference_comments;
         this._assigned_to = assigned_to;
         this._comments = comments;
+
     }
 
 
@@ -92,6 +94,15 @@ class SprintVO {
 
     set seq_sprint_job_id(value) {
         this._seq_sprint_job_id = value;
+    }
+
+
+    get reference_comments() {
+        return this._reference_comments;
+    }
+
+    set reference_comments(value) {
+        this._reference_comments = value;
     }
 }
 

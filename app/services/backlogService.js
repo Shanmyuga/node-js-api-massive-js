@@ -111,13 +111,13 @@ class BacklogService {
             searchByTaskDescParam = '%%';
         }
         let resultArray = new Array();
-        let query = 'select ab.dept_id ,ab.epic_desc,ab.stage_desc, ab.user_story_id,ab.user_story_task ,ab.epic_status ,ab.workorder_ref,ab.seq_work_id,ab.seq_backlog_id ,SPRINT_COUNT,REFERENCE_EPICS from  (select rownum as rn ,dept_id,epic_desc, stage_desc, user_story_id,user_story_task,epic_status ,workorder_ref,seq_work_id,seq_backlog_id,(Select count(1) from sci_sprint_job_details jb where jb.seq_backlog_id = bm.seq_backlog_id ) as SPRINT_COUNT,REFERENCE_EPICS from SCI_BACKLOG_MASTER bm where epic_status =:search0 and  dept_id like :search1 and epic_desc like :search2 and seq_work_id like :search3  and workorder_ref like :search4 and ( stage_desc like :search5 or stage_Desc is null) and user_story_task like :search6 order by ' + active + ' ' + order + ' ) ab where ab.rn between :startlimit and :endlimit ';
+        let query = 'select ab.dept_id ,ab.epic_desc,ab.stage_desc, ab.user_story_id,ab.user_story_task ,ab.epic_status ,ab.workorder_ref,ab.seq_work_id,ab.seq_backlog_id ,SPRINT_COUNT,REFERENCE_EPICS,seq_st_epic_id from  (select rownum as rn ,dept_id,epic_desc, stage_desc, user_story_id,user_story_task,epic_status ,workorder_ref,seq_work_id,seq_backlog_id,(Select count(1) from sci_sprint_job_details jb where jb.seq_backlog_id = bm.seq_backlog_id ) as SPRINT_COUNT,REFERENCE_EPICS,seq_st_epic_id from SCI_BACKLOG_MASTER bm where epic_status =:search0 and  dept_id like :search1 and epic_desc like :search2 and seq_work_id like :search3  and workorder_ref like :search4 and ( stage_desc like :search5 or stage_Desc is null) and user_story_task like :search6 order by ' + active + ' ' + order + ' ) ab where ab.rn between :startlimit and :endlimit ';
         console.log(query);
         const result = await db.simpleExecute(query, [searchByStatus, searchByDeptParam, searchByDescParam, searchByWorkParam, searchByWorkDescParam,searchByStageDescParam, searchByTaskDescParam,newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
             {
-                resultArray.push(new BackLogValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],row[11]));
+                resultArray.push(new BackLogValueObject(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],row[11],row[12]));
             }
         });
             return resultArray;
@@ -182,6 +182,17 @@ class BacklogService {
            }
             db.simpleExecute("update SCI_BACKLOG_MASTER set EPIC_STATUS = 'IN_SPRINT' ,updated_by = :updated_by,updated_date = sysdate where seq_backlog_id = :seq_backlog_id ",
                 [req.user,seq_backlog_id] ,{ autoCommit: true });
+
+        const results =  await db.simpleExecute("select reference_epics from SCI_BACKLOG_MASTER where  seq_backlog_id = :seq_backlog_id and reference_epics is not null",[seq_backlog_id]);
+        if(results.rows.length > 0) {
+            let reference_epics = results.rows[0][0];
+            let arrayinternalId = reference_epics.split(',');
+            for(let entry of arrayinternalId) {
+
+                db.simpleExecute("update SCI_BACKLOG_MASTER set EPIC_STATUS = 'IN_SPRINT' ,updated_by = :updated_by,updated_date = sysdate where seq_st_epic_id = :seq_st_epic_id and seq_work_id in (select seq_Work_id from sci_backlog_master bms where bms.seq_backlog_id = :seq_backlog_id )",
+                    [req.user,entry,seq_backlog_id] ,{ autoCommit: true });
+            }
+        }
 
 
         return true;
