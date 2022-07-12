@@ -27,12 +27,12 @@ class sprintService {
 
     static async getDeptSprints(dept) {
 
-        const result = await db.simpleExecute("select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate between sprint_start_date and sprint_end_Date  and sprint_dept = :dept union  select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+7 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept1 union  select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+8 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept2", [dept, dept,dept]
+        const result = await db.simpleExecute(" select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate -7 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept union select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate between sprint_start_date and sprint_end_Date  and sprint_dept = :dept union  select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+7 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept1 union  select  SEQ_SPRINT_ID ,sprint_name  from SCI_SPRINT_MASTER where sysdate+8 between sprint_start_date and sprint_end_Date  and sprint_dept = :dept2", [dept,dept, dept,dept]
         );
         let droparray = new Array();
 
         result.rows.forEach((row,index) => {
-            if(index <2) {
+            if(index <3) {
                 droparray.push(new DropDown(row[1], row[0]));
             }
         });

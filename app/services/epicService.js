@@ -63,7 +63,7 @@ class epicService {
 
     static async getWorkOrders(req) {
 
-        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGENICS.sci_workorder_master where word_order_Type = 'Fermenter' and wo_Status='Y'"
+        const result = await db.simpleExecute("select job_Desc ,seq_work_id from SCIGENICS.sci_workorder_master where word_order_Type in ('Fermenter','Service') and wo_Status='Y'"
         );
         let droparray = new Array();
         const gbp = new DropDown({ label: 'GBP', value: 'British Pounds' });
