@@ -129,7 +129,7 @@ class bulletinService {
         console.log(req.user);
         let message = req.body.message;
         let deptAssignedTo = req.body.dept_assigned_to;
-
+        let deptAssignedFrom = req.body.dept_assigned_from;
         let targetDate = req.body.target_date;
         let jobDesc = req.body.workOrder_desc;
         if(req.file) {
@@ -139,8 +139,8 @@ class bulletinService {
 
             let datefomart = this.formatDate(targetDate);
             console.log(datefomart);
-            db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS,ATTACH_FILENAME,ORIGINAL_FILENAME,CONTENT_TYPE) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null ,:filename,:originalName,:mimetype)  ",
-                [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart,filename,originalFileName,mimeType], {autoCommit: true});
+            db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS,ATTACH_FILENAME,ORIGINAL_FILENAME,CONTENT_TYPE,ASSIGNED_FROM) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null ,:filename,:originalName,:mimetype,:assigned_from)  ",
+                [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart,filename,originalFileName,mimeType,deptAssignedFrom], {autoCommit: true});
 
         }
         else {
