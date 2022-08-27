@@ -1,7 +1,7 @@
 class BulletinVO {
 
 
-    constructor(dept_assigned_to,ack_by,message,job_desc,message_created_by,message_created_date, target_date,seq_dept_mess_id,original_fileName,ack_comments) {
+    constructor(dept_assigned_to,ack_by,message,job_desc,message_created_by,message_created_date, target_date,seq_dept_mess_id,original_fileName,ack_comments,dept_assigned_from) {
 
 
         this._dept_assigned_to = dept_assigned_to;
@@ -15,6 +15,7 @@ class BulletinVO {
         this._message = message;
         this._original_fileName = original_fileName;
         this._ack_comments = ack_comments;
+        this._dept_assigned_from = dept_assigned_from;
 
     }
 
@@ -100,6 +101,15 @@ class BulletinVO {
 
     set message_created_date(value) {
         this._message_created_date = value;
+    }
+
+
+    get dept_assigned_from() {
+        return this._dept_assigned_from;
+    }
+
+    set dept_assigned_from(value) {
+        this._dept_assigned_from = value;
     }
 }
 module.exports = BulletinVO;

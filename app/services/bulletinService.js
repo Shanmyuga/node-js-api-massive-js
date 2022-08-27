@@ -68,6 +68,7 @@ class bulletinService {
         let active = req.query.active || 'id';
         const order = req.query.order || 'desc';
         let searchByDept = req.body.searchByDept || req.query.searchByDept;
+        let searchByDeptFrom = req.body.searchByDeptFrom || req.query.searchByDeptFrom;
         let searchByAckStatus = req.body.searchByAckStatus || req.query.searchByAckStatus;
         const newPage = (page - 1) * pageSize;
         let searchByDeptParam = '%' + searchByDept + '%';
@@ -81,10 +82,10 @@ class bulletinService {
 
         let resultArray = new Array();
 
-        const result = await db.simpleExecute("SELECT     ab.assigned_to, ab.ack_by, ab.message ,ab.job_desc,    ab.created_by,     ab.updated_date ,                               ab.targetdate,       ab.seq_dept_mess_id  ,ab.original_filename ,ab.ack_comments FROM        (            SELECT                ROWNUM  AS rn,     TO_CHAR(updated_Date, 'DD-MM-YYYY HH:MI:SS') as updated_Date ,         created_by,        message,       assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_mess_id   ,original_filename   ,ack_comments      FROM                sci_dept_messages  sj                where assigned_to like :dept_id         and ack_status like :ack_status                          ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam,searchByAckStatusParam, newPage, parseInt(newPage) + parseInt(pageSize)]
+        const result = await db.simpleExecute("SELECT     ab.assigned_to, ab.ack_by, ab.message ,ab.job_desc,    ab.created_by,     ab.updated_date ,                               ab.targetdate,       ab.seq_dept_mess_id  ,ab.original_filename ,ab.ack_comments,ab.assigned_From FROM        (            SELECT                ROWNUM  AS rn,     TO_CHAR(updated_Date, 'DD-MM-YYYY HH:MI:SS') as updated_Date ,         created_by,        message,       assigned_to,        ack_by,        job_desc,        to_char(target_date, 'dd-MM-yyyy') as targetdate,        seq_dept_mess_id   ,original_filename   ,ack_comments  ,assigned_from    FROM                sci_dept_messages  sj                where assigned_to like :dept_id         and ack_status like :ack_status                          ) ab    WHERE        ab.rn BETWEEN :startlimit AND :endlimit", [searchByDeptParam,searchByAckStatusParam, newPage, parseInt(newPage) + parseInt(pageSize)]
         );
         result.rows.forEach((row) => {
-            resultArray.push(new BulletinVO(row[0], row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8],row[9]));
+            resultArray.push(new BulletinVO(row[0], row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8],row[9],row[10]));
         });
         return resultArray;
     }
@@ -146,8 +147,8 @@ class bulletinService {
         else {
             let datefomart = this.formatDate(targetDate);
             console.log(datefomart);
-            db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS,ATTACH_FILENAME,ORIGINAL_FILENAME,CONTENT_TYPE) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null ,null,null,null)  ",
-                [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart], {autoCommit: true});
+            db.simpleExecute(" insert into SCI_DEPT_MESSAGES(SEQ_DEPT_MESS_ID, CREATED_BY, MESSAGE, ASSIGNED_TO, ACK_DATE, ACK_BY, INSERTED_BY,  UPDATED_BY, UPDATED_DATE, SEQ_WORK_ID, JOB_DESC, TARGET_DATE, ACK_STATUS, ACK_COMMENTS,ATTACH_FILENAME,ORIGINAL_FILENAME,CONTENT_TYPE,ASSIGNED_FROM) values  (SCI_DEPT_MESSAGE_SEQ.nextval,:CREATED_BY,:MESSAGE,:ASSIGNED_TO,null,null,:INSERTED_BY,:updated_by,sysdate,(select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref) ,:job_desc,to_date(:target_date,'YYYY-MM-dd'),'N',null ,null,null,null,:assigned_from)  ",
+                [req.user, message, deptAssignedTo, req.user,req.user,jobDesc,jobDesc,datefomart,deptAssignedFrom], {autoCommit: true});
 
 
         }

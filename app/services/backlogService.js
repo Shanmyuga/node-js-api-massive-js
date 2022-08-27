@@ -154,7 +154,7 @@ class BacklogService {
         let standardEpicId = req.body.standard_epic_id;
 
         standardEpicId.forEach(row => {
-            d
+
             db.simpleExecute("delete from sci_backlog_master where DEPT_ID=:dept_id and user_story_id =:story_id",[dept_id,row],{autoCommit:true});
             db.simpleExecute("    INSERT INTO \"SCIGENICS\".\"SCI_BACKLOG_MASTER\" (          seq_backlog_id,          dept_id,          user_story_task_desc,          epic_desc,          user_story_id,          created_date,          created_by,          epic_status,          updated_by,          updated_date,          workorder_ref     ,seq_work_id ) VALUES (          sci_backlog_master_seq.NEXTVAL,          :dept_id,          (select epic_desc||'-'|| stage_desc|| '-' || user_story_task  from SCI_STANDARD_EPIC_DATA where user_Story_id = :user_Story_id),        (select epic_desc from SCI_STANDARD_EPIC_DATA where user_Story_id = :user_Story_id),          :user_story_id,          sysdate,         :logged_in_user,         'BKLOG',           :logged_in_user,        sysdate,          :work_order_ref,          (select seq_work_id from SCI_WORKORDER_MASTER where job_desc = :work_order_ref)      )",
                 [dept_id,row,row,row,req.user,req.user,workOrderDesc,workOrderDesc] ,{ autoCommit: true });
