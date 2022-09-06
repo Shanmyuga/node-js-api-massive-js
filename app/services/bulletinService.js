@@ -123,7 +123,7 @@ class bulletinService {
         let seq_dept_mess_id = req.body.seq_dept_mess_id;
 
         db.simpleExecute(" update sci_dept_messages jb set jb.updated_date=sysdate,updated_by =:user_data , RISK_STATUS = 'C' where jb.SEQ_DEPT_MESS_ID = :SEQ_DEPT_MESS_ID",
-            [ack_message, req.user,req.user,seq_dept_mess_id], {autoCommit: true});
+            [ req.user,seq_dept_mess_id], {autoCommit: true});
 
 
 
