@@ -92,6 +92,40 @@ router.post(
         }
     })
 );
+
+router.post(
+    '/close',
+    authJwt(),
+    asyncHandler(async (req, res) => {
+
+        req.checkBody('seq_dept_mess_id').trim().notEmpty();
+
+        let errors = req.validationErrors();
+
+        if (errors) {
+            res.send({
+                success: false,
+                message: res.__('api.client.fields.empty')
+            });
+        } else {
+            const id = req.body.id;
+
+            const result = await bulletinService.closeBulleting(req, id);
+
+            if (result) {
+                res.send({
+                    success: true,
+                    message: res.__((id ? 'api.client.update.success' : 'api.client.save.success'))
+                });
+            } else {
+                res.send({
+                    success: false,
+                    message: res.__((id ? 'api.client.update.error' : 'api.client.save.error'))
+                });
+            }
+        }
+    })
+);
 router.get(
     '/load/:id',
     authJwt(),
